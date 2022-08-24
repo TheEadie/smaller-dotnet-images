@@ -7,8 +7,13 @@ COPY . ./
 RUN dotnet restore
 RUN dotnet publish -c Release -o out --runtime linux-musl-x64 -p:PublishTrimmed=true -p:PublishAot=true
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:7.0-alpine
+FROM alpine
 WORKDIR /app
+
+RUN apk add --no-cache \
+        libgcc \
+        libstdc++
+
 COPY --from=build /app/out .
 
 ENTRYPOINT ["./smaller-images"]
