@@ -1,0 +1,28 @@
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine as build
+WORKDIR /app
+
+RUN apk add clang gcc lld musl-dev build-base zlib-dev llvm
+
+COPY . ./
+RUN dotnet restore
+RUN dotnet publish \
+        -c Release \
+        -o out \
+        --runtime linux-musl-x64 \
+        -p:PublishTrimmed=true \
+        -p:PublishAot=true \
+        -p:StripSymbols=true \
+        -p:IlcOptimizationPreference=size \
+        -p:IlcDisableReflection=true
+        
+
+FROM alpine
+WORKDIR /app
+
+RUN apk add --no-cache \
+        libgcc \
+        libstdc++
+
+COPY --from=build /app/out/smaller-images .
+
+ENTRYPOINT ["./smaller-images"]

@@ -1,0 +1,47 @@
+FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine as build
+WORKDIR /app
+
+RUN apk add clang gcc lld musl-dev build-base zlib-dev llvm
+
+COPY . ./
+RUN dotnet restore
+RUN dotnet publish \
+        -c Release \
+        -o out \
+        --runtime linux-musl-x64 \
+        -p:PublishTrimmed=true \
+        -p:PublishAot=true \
+        -p:StripSymbols=true \
+        -p:IlcOptimizationPreference=size \
+        -p:IlcDisableReflection=true \
+        -p:DebuggerSupport=false \
+        -p:EnableUnsafeUTF7Encoding=false \
+        -p:EnableUnsafeBinaryFormatterSerialization=false \
+        -p:EventSourceSupport=false \
+        # This one switch accounts for all the savings
+        -p:InvariantGlobalization=true \
+        -p:PredefinedCulturesOnly=true \
+        -p:UseSystemResourceKeys=true \
+        -p:HttpActivityPropagationSupport=false \
+        -p:UseNativeHttpHandler=true \
+        -p:CustomResourceTypesSupport=false \
+        -p:EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization=false \
+        -p:BuiltInComInteropSupport=false \
+        -p:EnableCppCLIHostActivation=false \
+        -p:MetadataUpdaterSupport=false \
+        -p:_EnableConsumingManagedCodeFromNativeHosting=false \
+        -p:VerifyDependencyInjectionOpenGenericServiceTrimmability=false \
+        -p:NullabilityInfoContextSupport=false \
+        -p:_AggressiveAttributeTrimming=true
+        
+
+FROM alpine
+WORKDIR /app
+
+RUN apk add --no-cache \
+        libgcc \
+        libstdc++
+
+COPY --from=build /app/out/smaller-images .
+
+ENTRYPOINT ["./smaller-images"]
