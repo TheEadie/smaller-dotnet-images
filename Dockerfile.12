@@ -9,32 +9,14 @@ RUN dotnet publish \
         -c Release \
         -o out \
         --runtime linux-x64 \
-        --self-contained \
         -p:PublishTrimmed=true \
-        -p:StaticallyLinked=true \
+        -p:PublishAot=true \
         -p:StripSymbols=true \
         -p:IlcOptimizationPreference=size \
         -p:IlcDisableReflection=true \
-        -p:DebuggerSupport=false \
-        -p:EnableUnsafeUTF7Encoding=false \
-        -p:EnableUnsafeBinaryFormatterSerialization=false \
-        -p:EventSourceSupport=false \
-        # This one switch accounts for all the savings
+        -p:IlcGenerateStackTraceData=false \
         -p:InvariantGlobalization=true \
-        -p:PredefinedCulturesOnly=true \
-        -p:UseSystemResourceKeys=true \
-        -p:HttpActivityPropagationSupport=false \
-        -p:UseNativeHttpHandler=true \
-        -p:CustomResourceTypesSupport=false \
-        -p:EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization=false \
-        -p:BuiltInComInteropSupport=false \
-        -p:EnableCppCLIHostActivation=false \
-        -p:MetadataUpdaterSupport=false \
-        -p:_EnableConsumingManagedCodeFromNativeHosting=false \
-        -p:VerifyDependencyInjectionOpenGenericServiceTrimmability=false \
-        -p:NullabilityInfoContextSupport=false \
-        -p:_AggressiveAttributeTrimming=true
-        
+        -p:PublishStaticLinked=true
 
 FROM scratch
 WORKDIR /app
