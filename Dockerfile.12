@@ -1,0 +1,44 @@
+FROM mcr.microsoft.com/dotnet/sdk:7.0 as build
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y clang zlib1g-dev libkrb5-dev llvm
+
+COPY . ./
+RUN dotnet restore
+RUN dotnet publish \
+        -c Release \
+        -o out \
+        --runtime linux-x64 \
+        --self-contained \
+        -p:PublishTrimmed=true \
+        -p:StaticallyLinked=true \
+        -p:StripSymbols=true \
+        -p:IlcOptimizationPreference=size \
+        -p:IlcDisableReflection=true \
+        -p:DebuggerSupport=false \
+        -p:EnableUnsafeUTF7Encoding=false \
+        -p:EnableUnsafeBinaryFormatterSerialization=false \
+        -p:EventSourceSupport=false \
+        # This one switch accounts for all the savings
+        -p:InvariantGlobalization=true \
+        -p:PredefinedCulturesOnly=true \
+        -p:UseSystemResourceKeys=true \
+        -p:HttpActivityPropagationSupport=false \
+        -p:UseNativeHttpHandler=true \
+        -p:CustomResourceTypesSupport=false \
+        -p:EnableUnsafeBinaryFormatterInDesigntimeLicenseContextSerialization=false \
+        -p:BuiltInComInteropSupport=false \
+        -p:EnableCppCLIHostActivation=false \
+        -p:MetadataUpdaterSupport=false \
+        -p:_EnableConsumingManagedCodeFromNativeHosting=false \
+        -p:VerifyDependencyInjectionOpenGenericServiceTrimmability=false \
+        -p:NullabilityInfoContextSupport=false \
+        -p:_AggressiveAttributeTrimming=true
+        
+
+FROM scratch
+WORKDIR /app
+
+COPY --from=build /app/out/smaller-images .
+
+ENTRYPOINT ["./smaller-images"]
