@@ -1,14 +1,15 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0 as build
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y clang zlib1g-dev libkrb5-dev llvm
+RUN apk add clang binutils musl-dev build-base zlib-static
 
 COPY . ./
-RUN dotnet restore
+RUN dotnet restore --runtime linux-musl-x64
 RUN dotnet publish \
         -c Release \
         -o out \
-        --runtime linux-x64 \
+        --runtime linux-musl-x64 \
+        --self-contained true \
         -p:PublishTrimmed=true \
         -p:PublishAot=true \
         -p:StripSymbols=true \
@@ -16,11 +17,12 @@ RUN dotnet publish \
         -p:IlcDisableReflection=true \
         -p:IlcGenerateStackTraceData=false \
         -p:InvariantGlobalization=true \
-        -p:PublishStaticLinked=true
+        -p:StaticExecutable=true \
+        -p:StaticallyLinked=true
 
 FROM scratch
 WORKDIR /app
 
-COPY --from=build /app/out/smaller-images .
+COPY --from=build /app/out .
 
-ENTRYPOINT ["./smaller-images"]
+ENTRYPOINT ["/app/smaller-images"]
