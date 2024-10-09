@@ -25,8 +25,15 @@ Code examples to go alongside the lightning talk I gave about making .NET Docker
 | `smaller-images:net7-10` | IlcOptimization | 18.6MB |
 | `smaller-images:net7-11` | Disable everything through `-p` | 18.3MB |
 | `smaller-images:net7-12` | Static Linking + Scratch runtime image | 3.4MB |
+| `smaller-images:net7-13` | StaticExecutable + StaticLinking | 8.66MB |
 
-#### .NET 9
+#### .NET 8
+
+| Image | Description | Size |
+| --- | --- | --- |
+| `smaller-images:net9-1` | StaticExecutable + StaticLinking | 5.77MB |
+
+#### .NET 9 (RC2)
 
 | Image | Description | Size |
 | --- | --- | --- |
