@@ -23,6 +23,6 @@ RUN dotnet publish \
 FROM scratch
 WORKDIR /app
 
-COPY --from=build /app/out .
+COPY --from=build /app/out/smaller-images .
 
 ENTRYPOINT ["/app/smaller-images"]
